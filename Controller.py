@@ -27,6 +27,7 @@ class Controller:
         Main method.
         Runs the game loop
         '''
+        global infoWin
         # Build game window
         win = curses.newwin(self.height ,self.width,1,0)
         self.snakeWin = win
@@ -41,11 +42,9 @@ class Controller:
         char = self.snake.getHeadChar()
         for coordinate in coordinates:
             curses.mvwaddstr(win, coordinate[1], coordinate[0], char)
-        
-        # Draw snack
-        curses.mvwaddstr(win, self.snack.position[1], self.snack.position[0], "*")
 
-        curses.wrefresh(win)
+        self.writePoints()
+
         # Countdown to game start
         for i in range(5,0,-1):
             curses.mvwaddstr(win,1,1,f"Game will start in {i}")
@@ -55,6 +54,10 @@ class Controller:
         for i in range(1,self.width - 1):
             curses.mvwaddstr(win,1,i," ")
             curses.wrefresh(win)
+
+        # Draw snack
+        curses.mvwaddstr(win, self.snack.position[1], self.snack.position[0], "*")
+        curses.wrefresh(win)
         
         self.snakeThread = threading.Thread(target=self.moveSnake)
         self.snakeThread.start()
@@ -73,6 +76,12 @@ class Controller:
             ]:
                 self.lastDirectionKey = key
 
+    def writePoints(self):
+        global infoWin
+        points = len(self.snake)
+        curses.mvwaddstr(infoWin,3,1,f"Points: {points}")
+        curses.wrefresh(infoWin)
+
     def moveSnake(self):
         if self.lastDirectionKey == curses.KEY_UP:
             self.snake.setDirection("up")
@@ -82,51 +91,43 @@ class Controller:
             self.snake.setDirection("down")
         elif self.lastDirectionKey == curses.KEY_LEFT:
             self.snake.setDirection("left")
-        elif self.isHeadOnSnack():
-            self.snake.grow()
-        else:
-            # Delete old snake tail position
-            oldTailCoordinates = self.snake.getTailCoordinates()
-            curses.mvwaddstr(self.snakeWin,oldTailCoordinates[1],oldTailCoordinates[0]," ")
+
         # Check if next position has collision
         hasCollision = self.snake.hasCollision()
         if hasCollision:
             self.running = False
             return
-        # Move snake and draw new head position
-        self.snake.move()
+
+        if self.isHeadOnSnack():
+            # If head is on snack, grow snake and generate new snack
+            self.snake.grow()
+            self.snack = Snack(self.height, self.width, self.snake.coordinates)
+            curses.mvwaddstr(self.snakeWin, self.snack.position[1], self.snack.position[0], "*")
+            # Move snake and draw new head position
+            self.snake.move()
+            self.writePoints()
+        else:
+            # Delete old snake tail position
+            oldTailCoordinates = self.snake.getTailCoordinates()
+            curses.mvwaddstr(self.snakeWin,oldTailCoordinates[1],oldTailCoordinates[0]," ")
+            # Move snake and draw new head position
+            self.snake.move()
+
+
         headChar = self.snake.getHeadChar()
-        new_head = self.snake.getHeadCoordinates()
-
-        # Collision check: wall
-        if new_head[0] <= 0 or new_head[0] >= self.width - 1 or \
-            new_head[1] <= 0 or new_head[1] >= self.height - 1:
-            self.running = False
-            return
-
-        curses.mvwaddstr(self.snakeWin,new_head[1],new_head[0], headChar)
+        headCoordinates = self.snake.getHeadCoordinates()
+        curses.mvwaddstr(self.snakeWin,headCoordinates[1],headCoordinates[0], headChar)
         if self.running:
             sleep(0.1)
             self.snakeThread = threading.Thread(target=self.moveSnake)
             self.snakeThread.start()
-
-        # Snack eaten
-        if new_head == self.snack.position:
-            # Si le serpent mange la pomme, on le fait grandir et on génère une nouvelle pomme
-            self.snake.grow()
-            self.snack = Snack(self.height, self.width, self.snake.coordinates)
-            curses.mvwaddstr(self.snakeWin, self.snack.position[1], self.snack.position[0], "*")
     
     def isHeadOnSnack(self):
         '''
         Returns True if snakes head has the same coordinates as snack
         '''
-        # TO BE DEFINED, RETURNS TRUE OR FALSE RANDOMLY TO TEST
-
-        return random.choice([True,False,False,False])
-
-
-
+        headCoordinates = self.snake.getHeadCoordinates()
+        return headCoordinates == self.snack.position
 
 if __name__ == "__main__":
     # Initiate curses
@@ -150,6 +151,12 @@ if __name__ == "__main__":
     curses.mvwaddstr(instrWin,1,1,"Commands:")
     curses.mvwaddstr(instrWin,2,1,"q : quit")
     curses.wrefresh(instrWin)
+
+    # Set informations window
+    infoWin = curses.newwin(10,20,11,51)
+    curses.box(infoWin,0,0)
+    curses.mvwaddstr(infoWin,1,1,"Informations:")
+    curses.wrefresh(infoWin)
 
     # Instanciate controller and run game
     ctrl = Controller(stdscr)

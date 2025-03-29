@@ -16,11 +16,14 @@ class Snake:
         Initializes snake coordinates and direction
         '''
         self.coordinates = deque(maxlen=5)
-        for i in range(0, 5):
+        self.windowWidth = windowWidth
+        self.windowHeight = windowHeight
+        self.initialLength = 5
+        for i in range(0, self.initialLength):
             self.coordinates.append( \
                 ( \
-                    int(windowWidth/2-2+i), \
-                    int(windowHeight/2) \
+                    int(windowWidth/(self.initialLength//2)-2+i), \
+                    int(windowHeight/(self.initialLength//2)) \
                 ) \
             )
         self.deltaX = 1
@@ -30,6 +33,9 @@ class Snake:
         self.snakeMaxLength = (windowWidth-2) * (windowHeight-2)
         print(self.snakeMaxLength)
     
+    def __len__(self):
+        return len(self.coordinates) - self.initialLength
+
     def setDirection(self, newDirection):
         '''
         Sets snake direction and updates deltaX and deltaY.
@@ -73,9 +79,19 @@ class Snake:
         self.coordinates = newCoordinates
 
     def hasCollision(self):
+        '''
+        Checks if next position collides with snake body or
+        with the walls
+        '''
         currHeadCoordinates = self.getHeadCoordinates()
         nextHeadCoordinates = (currHeadCoordinates[0] + self.deltaX, currHeadCoordinates[1] + self.deltaY)
-        return nextHeadCoordinates in self.coordinates
+
+        return \
+            nextHeadCoordinates in self.coordinates \
+            or \
+            not 1 <= nextHeadCoordinates[0] <= self.windowWidth -2 \
+            or \
+            not 1 <= nextHeadCoordinates[1] <= self.windowHeight -2
 
     def getHeadCoordinates(self):
         return self.coordinates[-1]
