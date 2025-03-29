@@ -42,7 +42,7 @@ class Controller:
         curses.wrefresh(win)
         # Countdown to game start
         for i in range(5,0,-1):
-            curses.mvwaddstr(win,1,1,f"Game will starts in {i}")
+            curses.mvwaddstr(win,1,1,f"Game will start in {i}")
             curses.wrefresh(win)
             sleep(1)
         # Clear countdown
@@ -70,13 +70,13 @@ class Controller:
     def moveSnake(self):
         if self.lastDirectionKey == curses.KEY_UP:
             self.snake.setDirection("up")
-        if self.lastDirectionKey == curses.KEY_RIGHT:
+        elif self.lastDirectionKey == curses.KEY_RIGHT:
             self.snake.setDirection("right")
-        if self.lastDirectionKey == curses.KEY_DOWN:
+        elif self.lastDirectionKey == curses.KEY_DOWN:
             self.snake.setDirection("down")
-        if self.lastDirectionKey == curses.KEY_LEFT:
+        elif self.lastDirectionKey == curses.KEY_LEFT:
             self.snake.setDirection("left")
-        if self.isHeadOnSnack():
+        elif self.isHeadOnSnack():
             self.snake.grow()
         else:
             # Delete old snake tail position

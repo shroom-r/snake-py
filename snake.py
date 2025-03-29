@@ -29,7 +29,6 @@ class Snake:
 
         self.snakeMaxLength = (windowWidth-2) * (windowHeight-2)
         print(self.snakeMaxLength)
-        self.char = 0
     
     def setDirection(self, newDirection):
         '''
