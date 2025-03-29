@@ -1,6 +1,7 @@
 import unicurses as curses
 from time import sleep
 from snake import Snake
+from snack import Snack
 import threading
 import random
 
@@ -15,6 +16,7 @@ class Controller:
         self.width = 50
         self.height = 50
         self.snake = Snake(self.width, self.height)
+        self.snack = Snack(self.height, self.width, self.snake.coordinates)
         self.lastDirectionKey = None
         self.snakeWin = None
         self.running = True
@@ -39,6 +41,10 @@ class Controller:
         char = self.snake.getHeadChar()
         for coordinate in coordinates:
             curses.mvwaddstr(win, coordinate[1], coordinate[0], char)
+        
+        # Draw snack
+        curses.mvwaddstr(win, self.snack.position[1], self.snack.position[0], "*")
+
         curses.wrefresh(win)
         # Countdown to game start
         for i in range(5,0,-1):
@@ -90,12 +96,26 @@ class Controller:
         # Move snake and draw new head position
         self.snake.move()
         headChar = self.snake.getHeadChar()
-        headCoordinates = self.snake.getHeadCoordinates()
-        curses.mvwaddstr(self.snakeWin,headCoordinates[1],headCoordinates[0], headChar)
+        new_head = self.snake.getHeadCoordinates()
+
+        # Collision check: wall
+        if new_head[0] <= 0 or new_head[0] >= self.width - 1 or \
+            new_head[1] <= 0 or new_head[1] >= self.height - 1:
+            self.running = False
+            return
+
+        curses.mvwaddstr(self.snakeWin,new_head[1],new_head[0], headChar)
         if self.running:
             sleep(0.1)
             self.snakeThread = threading.Thread(target=self.moveSnake)
             self.snakeThread.start()
+
+        # Snack eaten
+        if new_head == self.snack.position:
+            # Si le serpent mange la pomme, on le fait grandir et on génère une nouvelle pomme
+            self.snake.grow()
+            self.snack = Snack(self.height, self.width, self.snake.coordinates)
+            curses.mvwaddstr(self.snakeWin, self.snack.position[1], self.snack.position[0], "*")
     
     def isHeadOnSnack(self):
         '''
