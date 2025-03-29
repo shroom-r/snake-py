@@ -1,23 +1,34 @@
 from collections import deque
 
+headChars = {
+    "up" : "^",
+    "down" : "v",
+    "right" : ">",
+    "left" : "<"
+}
+
 class Snake:
     '''
     Snake class manages snake functionalities.
     '''
-    def __init__(self):
+    def __init__(self,windowWidth, windowHeight):
         '''
         Initializes snake coordinates and direction
         '''
-        self.coordinates = deque([ \
-            (22,24), \
-            (23,24), \
-            (24,24), \
-            (25,24), \
-            (26,24), \
-        ],5)
-        self.direction = "up" # Dummy setup
-        self.setDirection("right")
+        self.coordinates = deque(maxlen=5)
+        for i in range(0, 5):
+            self.coordinates.append( \
+                ( \
+                    int(windowWidth/2-2+i), \
+                    int(windowHeight/2) \
+                ) \
+            )
+        self.deltaX = 1
+        self.deltaY = 0
+        self.direction = "right"
 
+        self.snakeMaxLength = (windowWidth-2) * (windowHeight-2)
+        print(self.snakeMaxLength)
         self.char = 0
     
     def setDirection(self, newDirection):
@@ -54,8 +65,24 @@ class Snake:
         newCoordinates = (currX + self.deltaX, currY + self.deltaY)
         self.coordinates.append(newCoordinates)
 
+    def grow(self):
+        '''
+        Increases snake length by 1
+        '''
+        newLen = self.coordinates.maxlen + 1
+        newCoordinates = deque(self.coordinates,maxlen=newLen)
+        self.coordinates = newCoordinates
+
+    def hasCollision(self):
+        currHeadCoordinates = self.getHeadCoordinates()
+        nextHeadCoordinates = (currHeadCoordinates[0] + self.deltaX, currHeadCoordinates[1] + self.deltaY)
+        return nextHeadCoordinates in self.coordinates
+
     def getHeadCoordinates(self):
         return self.coordinates[-1]
     
     def getTailCoordinates(self):
         return self.coordinates[0]
+    
+    def getHeadChar(self):
+        return headChars[self.direction]

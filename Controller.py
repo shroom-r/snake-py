@@ -1,6 +1,8 @@
 import unicurses as curses
 from time import sleep
 from snake import Snake
+import threading
+import random
 
 class Controller:
     '''
@@ -10,10 +12,13 @@ class Controller:
     '''
     def __init__(self, stdscr):
         self.stdscr = stdscr
-        self.snake = Snake()
         self.width = 50
         self.height = 50
-        pass
+        self.snake = Snake(self.width, self.height)
+        self.lastDirectionKey = None
+        self.snakeWin = None
+        self.running = True
+        self.snakeThread = None
 
     def run(self):
         '''
@@ -22,16 +27,18 @@ class Controller:
         '''
         # Build game window
         win = curses.newwin(self.height ,self.width,1,0)
+        self.snakeWin = win
         curses.box(win,0,0) # Set border
+        curses.wrefresh(win)
         curses.nodelay(win, True)
-        running = True
         curses.keypad(win,True)
         curses.notimeout(win, True)
 
         # Draw snake
         coordinates = self.snake.coordinates
+        char = self.snake.getHeadChar()
         for coordinate in coordinates:
-            curses.mvwaddstr(win, coordinate[1], coordinate[0], "0")
+            curses.mvwaddstr(win, coordinate[1], coordinate[0], char)
         curses.wrefresh(win)
         # Countdown to game start
         for i in range(5,0,-1):
@@ -43,32 +50,61 @@ class Controller:
             curses.mvwaddstr(win,1,i," ")
             curses.wrefresh(win)
         
-        while (running):
+        self.snakeThread = threading.Thread(target=self.moveSnake)
+        self.snakeThread.start()
+
+        while (self.running):
             key = curses.wgetch(win)
             # Leave game on q key
             if (key == ord('q')):
-                running = False
+                self.running = False
                 break
-            # Change snake direction based on key
-            if key == curses.KEY_UP:
-                self.snake.setDirection("up")
-            if key == curses.KEY_RIGHT:
-                self.snake.setDirection("right")
-            if key == curses.KEY_DOWN:
-                self.snake.setDirection("down")
-            if key == curses.KEY_LEFT:
-                self.snake.setDirection("left")
-            curses.flushinp()
-            
+            if key in [
+                curses.KEY_UP, \
+                curses.KEY_RIGHT, \
+                curses.KEY_DOWN, \
+                curses.KEY_LEFT,
+            ]:
+                self.lastDirectionKey = key
+
+    def moveSnake(self):
+        if self.lastDirectionKey == curses.KEY_UP:
+            self.snake.setDirection("up")
+        if self.lastDirectionKey == curses.KEY_RIGHT:
+            self.snake.setDirection("right")
+        if self.lastDirectionKey == curses.KEY_DOWN:
+            self.snake.setDirection("down")
+        if self.lastDirectionKey == curses.KEY_LEFT:
+            self.snake.setDirection("left")
+        if self.isHeadOnSnack():
+            self.snake.grow()
+        else:
             # Delete old snake tail position
             oldTailCoordinates = self.snake.getTailCoordinates()
-            curses.mvwaddstr(win,oldTailCoordinates[1],oldTailCoordinates[0]," ")
-            # Move snake and draw new head position
-            self.snake.move()
-            headCoordinates = self.snake.getHeadCoordinates()
-            curses.mvwaddstr(win,headCoordinates[1],headCoordinates[0],self.snake.char)
-            
+            curses.mvwaddstr(self.snakeWin,oldTailCoordinates[1],oldTailCoordinates[0]," ")
+        # Check if next position has collision
+        hasCollision = self.snake.hasCollision()
+        if hasCollision:
+            self.running = False
+            return
+        # Move snake and draw new head position
+        self.snake.move()
+        headChar = self.snake.getHeadChar()
+        headCoordinates = self.snake.getHeadCoordinates()
+        curses.mvwaddstr(self.snakeWin,headCoordinates[1],headCoordinates[0], headChar)
+        if self.running:
             sleep(0.1)
+            self.snakeThread = threading.Thread(target=self.moveSnake)
+            self.snakeThread.start()
+    
+    def isHeadOnSnack(self):
+        '''
+        Returns True if snakes head has the same coordinates as snack
+        '''
+        # TO BE DEFINED, RETURNS TRUE OR FALSE RANDOMLY TO TEST
+
+        return random.choice([True,False,False,False])
+
 
 
 
@@ -100,8 +136,11 @@ if __name__ == "__main__":
     try:
         ctrl.run()
     except KeyboardInterrupt:
-        print("Game stopped !")
+        print("Game interrupted !")
+    except Exception as err:
+        print(err)
     finally:
+        ctrl.running = False
         # Set terminal settings to default before leaving
         curses.nocbreak()
         curses.echo()
