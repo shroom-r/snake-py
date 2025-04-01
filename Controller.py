@@ -15,7 +15,7 @@ class Controller:
         self.width = 50
         self.height = 50
         self.snake = Snake(self.width, self.height)
-        self.snack = Snack(self.height, self.width)
+        self.snack = Snack(self.width, self.height)
         self.lastDirectionKey = None
         self.snakeWin = None
         self.running = True
@@ -78,7 +78,7 @@ class Controller:
 
     def writePoints(self):
         global infoWin
-        points = len(self.snake)
+        points = self.snake.getPoints()
         curses.mvwaddstr(infoWin,3,1,f"Points: {points}")
         curses.wrefresh(infoWin)
 
@@ -98,20 +98,20 @@ class Controller:
             self.running = False
             return
 
-        if self.isHeadOnSnack():
+        if self.hasSnack():
             # If head is on snack, grow snake and generate new snack
             self.snake.grow()
             self.snack.generate_position(self.snake.coordinates)
             curses.mvwaddstr(self.snakeWin, self.snack.position[1], self.snack.position[0], "o")
             # Move snake and draw new head position
-            self.snake.move()
-            self.writePoints()
+            
         else:
             # Delete old snake tail position
             oldTailCoordinates = self.snake.getTailCoordinates()
             curses.mvwaddstr(self.snakeWin,oldTailCoordinates[1],oldTailCoordinates[0]," ")
             # Move snake and draw new head position
-            self.snake.move()
+        self.snake.move()
+        self.writePoints()
 
 
         headChar = self.snake.getHeadChar()
@@ -122,12 +122,12 @@ class Controller:
             self.snakeThread = threading.Thread(target=self.moveSnake)
             self.snakeThread.start()
     
-    def isHeadOnSnack(self):
+    def hasSnack(self):
         '''
-        Returns True if snakes head has the same coordinates as snack
+        Returns True if snakes head will move on snack on next move
         '''
-        headCoordinates = self.snake.getHeadCoordinates()
-        return headCoordinates == self.snack.position
+        newHeadCoordinate = self.snake.nextHeadCoordinate
+        return newHeadCoordinate == self.snack.position
 
 if __name__ == "__main__":
     # Initiate curses
