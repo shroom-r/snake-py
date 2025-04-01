@@ -3,7 +3,6 @@ from time import sleep
 from snake import Snake
 from snack import Snack
 import threading
-import random
 
 class Controller:
     '''
@@ -16,7 +15,7 @@ class Controller:
         self.width = 50
         self.height = 50
         self.snake = Snake(self.width, self.height)
-        self.snack = Snack(self.height, self.width, self.snake.coordinates)
+        self.snack = Snack(self.height, self.width)
         self.lastDirectionKey = None
         self.snakeWin = None
         self.running = True
@@ -56,7 +55,8 @@ class Controller:
             curses.wrefresh(win)
 
         # Draw snack
-        curses.mvwaddstr(win, self.snack.position[1], self.snack.position[0], "*")
+        self.snack.generate_position(self.snake.coordinates)
+        curses.mvwaddstr(win, self.snack.position[1], self.snack.position[0], "o")
         curses.wrefresh(win)
         
         self.snakeThread = threading.Thread(target=self.moveSnake)
@@ -101,8 +101,8 @@ class Controller:
         if self.isHeadOnSnack():
             # If head is on snack, grow snake and generate new snack
             self.snake.grow()
-            self.snack = Snack(self.height, self.width, self.snake.coordinates)
-            curses.mvwaddstr(self.snakeWin, self.snack.position[1], self.snack.position[0], "*")
+            self.snack.generate_position(self.snake.coordinates)
+            curses.mvwaddstr(self.snakeWin, self.snack.position[1], self.snack.position[0], "o")
             # Move snake and draw new head position
             self.snake.move()
             self.writePoints()
