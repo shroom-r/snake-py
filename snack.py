@@ -1,13 +1,13 @@
 import random
 
 class Snack:
-    def __init__(self, screen_height, screen_width):
-        self.all_positions = self.generate_all_positions(screen_height, screen_width)
+    def __init__(self, screen_width, screen_height):
+        self.all_positions = self.generate_all_positions(screen_width, screen_height)
         # On pré-calcule toutes les positions valides de la grille (sauf les bordures).
         # Cela ne se fait qu’une seule fois par pomme → très efficace.
         self.position = ()
     
-    def generate_all_positions(self, height, width):
+    def generate_all_positions(self, width, height):
         # on crée une liste de tuples (x, y) représentant toutes les cases du plateau sauf les bordures.
         return [
             (x, y)

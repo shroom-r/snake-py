@@ -22,19 +22,22 @@ class Snake:
         for i in range(0, self.initialLength):
             self.coordinates.append( \
                 ( \
-                    int(windowWidth/(self.initialLength//2)-2+i), \
-                    int(windowHeight/(self.initialLength//2)) \
+                    windowWidth//2-self.initialLength//2+i, \
+                    windowHeight//2 \
                 ) \
             )
         self.deltaX = 1
         self.deltaY = 0
         self.direction = "right"
 
+        self.nextHeadCoordinate = ()
+        self.updateNextCoordinate()
+
         self.snakeMaxLength = (windowWidth-2) * (windowHeight-2)
         print(self.snakeMaxLength)
     
-    def __len__(self):
-        return len(self.coordinates) - self.initialLength
+    def getPoints(self):
+        return self.coordinates.maxlen - self.initialLength
 
     def setDirection(self, newDirection):
         '''
@@ -60,15 +63,20 @@ class Snake:
                 self.deltaY = 1
             if self.direction == "left":
                 self.deltaX = -1
+            self.updateNextCoordinate()
 
     def move(self):
         '''
         Moves snake 1 unit in current direction
         '''
-        currX = self.coordinates[-1][0]
-        currY = self.coordinates[-1][1]
-        newCoordinates = (currX + self.deltaX, currY + self.deltaY)
-        self.coordinates.append(newCoordinates)
+        self.coordinates.append(self.nextHeadCoordinate)
+        self.updateNextCoordinate()
+
+    def updateNextCoordinate(self):
+        self.nextHeadCoordinate = (
+            self.coordinates[-1][0] + self.deltaX,
+            self.coordinates[-1][1] + self.deltaY
+        )
 
     def grow(self):
         '''
@@ -83,15 +91,12 @@ class Snake:
         Checks if next position collides with snake body or
         with the walls
         '''
-        currHeadCoordinates = self.getHeadCoordinates()
-        nextHeadCoordinates = (currHeadCoordinates[0] + self.deltaX, currHeadCoordinates[1] + self.deltaY)
-
         return \
-            nextHeadCoordinates in self.coordinates \
+            self.nextHeadCoordinate in self.coordinates \
             or \
-            not 1 <= nextHeadCoordinates[0] <= self.windowWidth -2 \
+            not 1 <= self.nextHeadCoordinate[0] <= self.windowWidth -2 \
             or \
-            not 1 <= nextHeadCoordinates[1] <= self.windowHeight -2
+            not 1 <= self.nextHeadCoordinate[1] <= self.windowHeight -2
 
     def getHeadCoordinates(self):
         return self.coordinates[-1]
