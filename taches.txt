@@ -1,3 +1,0 @@
-snack : . coordonnées de la snack.
-	. génère x et y aléatoire.
-	. 
