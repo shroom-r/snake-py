@@ -1,3 +1,4 @@
+from window import Window
 import unicurses as curses
 from time import sleep
 from snake import Snake
@@ -17,53 +18,37 @@ class Controller:
         self.snake = Snake(self.width, self.height)
         self.snack = Snack(self.width, self.height)
         self.lastDirectionKey = None
-        self.snakeWin = None
+        
         self.running = True
         self.snakeThread = None
 
     def run(self):
         '''
-        Main method.
         Runs the game loop
         '''
         global infoWin
         # Build game window
-        win = curses.newwin(self.height ,self.width,1,0)
-        self.snakeWin = win
-        curses.box(win,0,0) # Set border
-        curses.wrefresh(win)
-        curses.nodelay(win, True)
-        curses.keypad(win,True)
-        curses.notimeout(win, True)
+        self.window = Window(self.height, self.width)
+        
 
         # Draw snake
-        coordinates = self.snake.coordinates
-        char = self.snake.getHeadChar()
-        for coordinate in coordinates:
-            curses.mvwaddstr(win, coordinate[1], coordinate[0], char)
+        self.window.draw_snake(self.snake.coordinates, self.snake.getHeadChar())
 
-        self.writePoints()
+        self.window.write_points(len(self.snake))
 
         # Countdown to game start
-        for i in range(5,0,-1):
-            curses.mvwaddstr(win,1,1,f"Game will start in {i}")
-            curses.wrefresh(win)
-            sleep(1)
-        # Clear countdown
-        for i in range(1,self.width - 1):
-            curses.mvwaddstr(win,1,i," ")
-            curses.wrefresh(win)
+        self.window.countdown()
 
         # Draw snack
         self.snack.generate_position(self.snake.coordinates)
-        curses.mvwaddstr(win, self.snack.position[1], self.snack.position[0], "o")
-        curses.wrefresh(win)
+        self.window.draw_snack(self.snack.position[0], self.snack.position[1])
+        self.window.refresh()
         
         self.snakeThread = threading.Thread(target=self.moveSnake)
         self.snakeThread.start()
 
         while (self.running):
-            key = curses.wgetch(win)
+            key = self.window.get_key()
             # Leave game on q key
             if (key == ord('q')):
                 self.running = False
@@ -83,6 +68,7 @@ class Controller:
         curses.wrefresh(infoWin)
 
     def moveSnake(self):
+        # executes in a thread → moves the snake, displays, updates the score
         if self.lastDirectionKey == curses.KEY_UP:
             self.snake.setDirection("up")
         elif self.lastDirectionKey == curses.KEY_RIGHT:
@@ -102,21 +88,21 @@ class Controller:
             # If head is on snack, grow snake and generate new snack
             self.snake.grow()
             self.snack.generate_position(self.snake.coordinates)
-            curses.mvwaddstr(self.snakeWin, self.snack.position[1], self.snack.position[0], "o")
+            self.window.draw_snack(self.snack.position[0], self.snack.position[1])
             # Move snake and draw new head position
             
         else:
             # Delete old snake tail position
             oldTailCoordinates = self.snake.getTailCoordinates()
-            curses.mvwaddstr(self.snakeWin,oldTailCoordinates[1],oldTailCoordinates[0]," ")
+            self.window.clear_snack_area(oldTailCoordinates[0], oldTailCoordinates[1])
             # Move snake and draw new head position
         self.snake.move()
-        self.writePoints()
+        self.window.write_points(len(self.snake))
 
 
         headChar = self.snake.getHeadChar()
         headCoordinates = self.snake.getHeadCoordinates()
-        curses.mvwaddstr(self.snakeWin,headCoordinates[1],headCoordinates[0], headChar)
+        self.window.draw_snake([headCoordinates], headChar)
         if self.running:
             sleep(0.1)
             self.snakeThread = threading.Thread(target=self.moveSnake)

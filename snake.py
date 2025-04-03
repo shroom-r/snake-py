@@ -106,3 +106,6 @@ class Snake:
     
     def getHeadChar(self):
         return headChars[self.direction]
+        
+    def __len__(self):
+        return len(self.coordinates)
