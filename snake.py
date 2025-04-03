@@ -34,7 +34,6 @@ class Snake:
         self.updateNextCoordinate()
 
         self.snakeMaxLength = (windowWidth-2) * (windowHeight-2)
-        print(self.snakeMaxLength)
     
     def getPoints(self):
         return self.coordinates.maxlen - self.initialLength
@@ -109,3 +108,6 @@ class Snake:
         
     def __len__(self):
         return len(self.coordinates)
+    
+    def isWin(self):
+        return len(self) == self.snakeMaxLength

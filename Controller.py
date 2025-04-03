@@ -1,4 +1,5 @@
-from window import Window
+from window.window import Window
+from window.gameWindow import GameWindow
 import unicurses as curses
 from time import sleep
 from snake import Snake
@@ -18,7 +19,27 @@ class Controller:
         self.snake = Snake(self.width, self.height)
         self.snack = Snack(self.width, self.height)
         self.lastDirectionKey = None
-        
+
+        # Set title window
+        titlewin = Window(50,1,0,0, False)
+        titlewin.drawChar(0,0,"Snake PY")
+        titlewin.refreshWindow()
+
+        # Set command instructions window
+        instrWin = Window(20, 10, 51, 1, True)
+        instrWin.drawChar(1, 1, "Commands:")
+        instrWin.drawChar(1, 2, "q : quit")
+        instrWin.refreshWindow()
+
+        # Set informations window
+        infoWin = Window(20, 10, 51, 11, True)
+        infoWin.drawChar(1,1,"Informations:")
+        infoWin.refreshWindow()
+        self.infoWin = infoWin
+
+        # Build game window
+        self.window = GameWindow(self.width, self.height, 0, 1, True)
+
         self.running = True
         self.snakeThread = None
 
@@ -26,27 +47,23 @@ class Controller:
         '''
         Runs the game loop
         '''
-        global infoWin
-        # Build game window
-        self.window = Window(self.height, self.width)
-        
-
-        # Draw snake
+        # Draw initial snake
         self.window.draw_snake(self.snake.coordinates, self.snake.getHeadChar())
 
-        self.window.write_points(len(self.snake))
+        self.writePoints()
 
         # Countdown to game start
         self.window.countdown()
 
-        # Draw snack
+        # Draw initial snack
         self.snack.generate_position(self.snake.coordinates)
         self.window.draw_snack(self.snack.position[0], self.snack.position[1])
-        self.window.refresh()
         
+        # Run snake moving logic to another thread to keep the reactivity to key press while snake move loop sleeps
         self.snakeThread = threading.Thread(target=self.moveSnake)
         self.snakeThread.start()
 
+        # Run game loop that essentially detects and reacts to key press
         while (self.running):
             key = self.window.get_key()
             # Leave game on q key
@@ -62,10 +79,9 @@ class Controller:
                 self.lastDirectionKey = key
 
     def writePoints(self):
-        global infoWin
         points = self.snake.getPoints()
-        curses.mvwaddstr(infoWin,3,1,f"Points: {points}")
-        curses.wrefresh(infoWin)
+        self.infoWin.drawChar(1,3,f"Points: {points}")
+        self.infoWin.refreshWindow()
 
     def moveSnake(self):
         # executes in a thread → moves the snake, displays, updates the score
@@ -87,6 +103,11 @@ class Controller:
         if self.hasSnack():
             # If head is on snack, grow snake and generate new snack
             self.snake.grow()
+            # If the snake reaches its max length, the game is win
+            if self.snake.isWin():
+                self.running = False
+                print("Jeu gagné")
+                return
             self.snack.generate_position(self.snake.coordinates)
             self.window.draw_snack(self.snack.position[0], self.snack.position[1])
             # Move snake and draw new head position
@@ -97,7 +118,7 @@ class Controller:
             self.window.clear_snack_area(oldTailCoordinates[0], oldTailCoordinates[1])
             # Move snake and draw new head position
         self.snake.move()
-        self.window.write_points(len(self.snake))
+        self.writePoints()
 
 
         headChar = self.snake.getHeadChar()
@@ -108,53 +129,10 @@ class Controller:
             self.snakeThread = threading.Thread(target=self.moveSnake)
             self.snakeThread.start()
     
+    
     def hasSnack(self):
         '''
         Returns True if snakes head will move on snack on next move
         '''
         newHeadCoordinate = self.snake.nextHeadCoordinate
         return newHeadCoordinate == self.snack.position
-
-if __name__ == "__main__":
-    # Initiate curses
-    stdscr = curses.initscr()
-    curses.clear()
-    curses.noecho()
-    curses.cbreak()
-    curses.nodelay(stdscr, True)
-    curses.start_color()
-    curses.use_default_colors()
-    curses.curs_set(0) # Hide cursor
-
-    # Set title window
-    titlewin = curses.newwin(1,50,0,0)
-    curses.mvwaddstr(titlewin,0,0,"Snake PY")
-    curses.wrefresh(titlewin)
-    
-    # Set command instructions window
-    instrWin = curses.newwin(10,20,1,51)
-    curses.box(instrWin,0,0)
-    curses.mvwaddstr(instrWin,1,1,"Commands:")
-    curses.mvwaddstr(instrWin,2,1,"q : quit")
-    curses.wrefresh(instrWin)
-
-    # Set informations window
-    infoWin = curses.newwin(10,20,11,51)
-    curses.box(infoWin,0,0)
-    curses.mvwaddstr(infoWin,1,1,"Informations:")
-    curses.wrefresh(infoWin)
-
-    # Instanciate controller and run game
-    ctrl = Controller(stdscr)
-    try:
-        ctrl.run()
-    except KeyboardInterrupt:
-        print("Game interrupted !")
-    except Exception as err:
-        print(err)
-    finally:
-        ctrl.running = False
-        # Set terminal settings to default before leaving
-        curses.nocbreak()
-        curses.echo()
-        curses.endwin()
