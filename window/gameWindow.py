@@ -15,11 +15,15 @@ class GameWindow(Window):
 
     def draw_snake(self, coordinates, char):
         for x, y in coordinates:
+            curses.wattron(self.win, curses.color_pair(1))
             self.drawChar(x, y, char)
+            curses.wattroff(self.win, curses.color_pair(1))
         self.refreshWindow()
 
     def draw_snack(self, x, y):
+        curses.wattron(self.win, curses.color_pair(2))
         self.drawChar(x, y, "o")
+        curses.wattroff(self.win, curses.color_pair(2))
         self.refreshWindow()
 
     def countdown(self):

@@ -7,6 +7,9 @@ Initializes unicurses and
 Creates a Controller object and launches its run() method.
     '''
     stdscr = unicurses.initscr()
+    unicurses.start_color()
+    unicurses.init_pair(1, unicurses.COLOR_GREEN, unicurses.COLOR_BLACK)
+    unicurses.init_pair(2, unicurses.COLOR_RED, unicurses.COLOR_BLACK)  
     unicurses.clear()
     unicurses.cbreak()
     unicurses.noecho()
