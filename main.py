@@ -3,8 +3,8 @@ from Controller import Controller
 
 def main():
     '''
-Initializes unicurses and
-Creates a Controller object and launches its run() method.
+    Initializes unicurses and
+    Creates a Controller object and launches its run() method.
     '''
     stdscr = unicurses.initscr()
     unicurses.clear()

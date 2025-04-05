@@ -77,13 +77,19 @@ class Snake:
             self.coordinates[-1][1] + self.deltaY
         )
 
-    def grow(self):
+    def grow(self, increment = 1):
         '''
         Increases snake length by 1
         '''
-        newLen = self.coordinates.maxlen + 1
-        newCoordinates = deque(self.coordinates,maxlen=newLen)
+        newLen = self.coordinates.maxlen + increment
+        currCoordinates = self.coordinates
+        newCoordinates = deque(maxlen=newLen)
+        newCoordinates.extend(currCoordinates)
         self.coordinates = newCoordinates
+    
+    def isGrowing(self):
+        # Returns True if the coordinates deque maxLen is greater than snake length (meaning the snake is still growing)
+        return self.coordinates.maxlen > len(self)
 
     def hasCollision(self):
         '''

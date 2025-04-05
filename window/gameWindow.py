@@ -18,8 +18,8 @@ class GameWindow(Window):
             self.drawChar(x, y, char)
         self.refreshWindow()
 
-    def draw_snack(self, x, y):
-        self.drawChar(x, y, "o")
+    def draw_snack(self, x, y, char):
+        self.drawChar(x, y, char)
         self.refreshWindow()
 
     def countdown(self):

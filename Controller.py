@@ -26,13 +26,17 @@ class Controller:
         titlewin.refreshWindow()
 
         # Set command instructions window
-        instrWin = Window(20, 10, 51, 1, True)
+        instrWin = Window(21, 10, 51, 1, True)
         instrWin.drawChar(1, 1, "Commands:")
         instrWin.drawChar(1, 2, "q : quit")
+        instrWin.drawChar(1, 3, "arrows : move snake")
+        instrWin.drawChar(1, 5, "Snacks:")
+        instrWin.drawChar(1, 6, "o = normal (1pt)")
+        instrWin.drawChar(1, 7, "Q = magic (3pt)")
         instrWin.refreshWindow()
 
         # Set informations window
-        infoWin = Window(20, 10, 51, 11, True)
+        infoWin = Window(21, 10, 51, 11, True)
         infoWin.drawChar(1,1,"Informations:")
         infoWin.refreshWindow()
         self.infoWin = infoWin
@@ -57,7 +61,7 @@ class Controller:
 
         # Draw initial snack
         self.snack.generate_position(self.snake.coordinates)
-        self.window.draw_snack(self.snack.position[0], self.snack.position[1])
+        self.window.draw_snack(self.snack.position[0], self.snack.position[1], self.snack.char)
         
         # Run snake moving logic to another thread to keep the reactivity to key press while snake move loop sleeps
         self.snakeThread = threading.Thread(target=self.moveSnake)
@@ -101,22 +105,26 @@ class Controller:
             return
 
         if self.hasSnack():
-            # If head is on snack, grow snake and generate new snack
-            self.snake.grow()
+            # If head is on snack, grow snake and generate new 
+            if (self.snack.isMagic):
+                self.snake.grow(3)
+            else:
+                self.snake.grow()
             # If the snake reaches its max length, the game is win
             if self.snake.isWin():
                 self.running = False
                 print("Jeu gagné")
                 return
             self.snack.generate_position(self.snake.coordinates)
-            self.window.draw_snack(self.snack.position[0], self.snack.position[1])
+            self.window.draw_snack(self.snack.position[0], self.snack.position[1], self.snack.char)
             # Move snake and draw new head position
             
         else:
             # Delete old snake tail position
-            oldTailCoordinates = self.snake.getTailCoordinates()
-            self.window.clear_snack_area(oldTailCoordinates[0], oldTailCoordinates[1])
-            # Move snake and draw new head position
+            if not self.snake.isGrowing():
+                oldTailCoordinates = self.snake.getTailCoordinates()
+                self.window.clear_snack_area(oldTailCoordinates[0], oldTailCoordinates[1])
+        # Move snake and draw new head position
         self.snake.move()
         self.writePoints()
 
