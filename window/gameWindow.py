@@ -20,9 +20,9 @@ class GameWindow(Window):
             curses.wattroff(self.win, curses.color_pair(1))
         self.refreshWindow()
 
-    def draw_snack(self, x, y):
+    def draw_snack(self, x, y, char):
         curses.wattron(self.win, curses.color_pair(2))
-        self.drawChar(x, y, "o")
+        self.drawChar(x, y, char)
         curses.wattroff(self.win, curses.color_pair(2))
         self.refreshWindow()
 
