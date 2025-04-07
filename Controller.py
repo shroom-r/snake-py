@@ -2,7 +2,8 @@ from window.window import Window
 from window.gameWindow import GameWindow
 import unicurses
 from time import sleep
-from snake import Snake
+from snakes.snake import Snake
+from snakes.agileSnake import AgileSnake
 from snack import Snack
 import threading
 
@@ -12,11 +13,16 @@ class Controller:
     Catches user inputs and make all classes work together.
     Sets timing for snake moves, controls snake eating snack, etc.
     '''
-    def __init__(self, stdscr):
+    def __init__(self, stdscr, snakeId):
         self.stdscr = stdscr
         self.width = 50
         self.height = 50
-        self.snake = Snake(self.width, self.height)
+        if (snakeId == "1"):
+            self.snake = Snake(self.width, self.height)
+        elif snakeId == "2":
+            self.snake = AgileSnake(self.width, self.height)
+        else:
+            raise KeyError("Selected snake does not exist")
         self.snack = Snack(self.width, self.height)
         self.lastDirectionKey = None
 

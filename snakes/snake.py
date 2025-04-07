@@ -97,9 +97,19 @@ class Snake:
         Checks if next position collides with snake body or
         with the walls
         '''
+        return self.hasCollisionWithBody() or self.hasCollisionWithWall()
+    
+    def hasCollisionWithBody(self):
+        '''
+        Check if has collision with body
+        '''
+        return self.nextHeadCoordinate in self.coordinates
+
+    def hasCollisionWithWall(self):
+        '''
+        Check if has collision with walls
+        '''
         return \
-            self.nextHeadCoordinate in self.coordinates \
-            or \
             not 1 <= self.nextHeadCoordinate[0] <= self.windowWidth -2 \
             or \
             not 1 <= self.nextHeadCoordinate[1] <= self.windowHeight -2

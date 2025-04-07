@@ -6,6 +6,11 @@ def main():
     Initializes unicurses and
     Creates a Controller object and launches its run() method.
     '''
+    print('Select snake.')
+    print('1: Normal snake. Weak, loses on every collision')
+    print('2: Agile snake. Is agile. Jumps over its own body (some times at least...)')
+    snakeId = input("Enter number and press Enter: ")
+
     stdscr = unicurses.initscr()
     unicurses.start_color()
     unicurses.init_pair(1, unicurses.COLOR_GREEN, unicurses.COLOR_BLACK)
@@ -18,7 +23,8 @@ def main():
     unicurses.keypad(stdscr, True)
 
     # Instanciate controller and run game
-    ctrl = Controller(stdscr)
+    ctrl = Controller(stdscr, snakeId)
+
 
     try:
         ctrl.run()
