@@ -1,5 +1,4 @@
-import unicurses as curses
-
+import unicurses
 
 class Window:
     '''
@@ -11,17 +10,17 @@ class Window:
         self.height = height
         self.x = x
         self.y = y
-        self.win = curses.newwin(height, width, y, x)
+        self.win = unicurses.newwin(height, width, y, x)
         if hasBorder:
-            curses.box(self.win, 0, 0)
+            unicurses.box(self.win, 0, 0)
         
         self.refreshWindow()
 
     def drawChar(self, x, y, char):
-        curses.mvwaddstr(self.win, y, x, char)
+        unicurses.mvwaddstr(self.win, y, x, char)
     
     def eraseChar(self, x, y):
-        curses.mvwaddstr(self.win, y, x, " ")
+        unicurses.mvwaddstr(self.win, y, x, " ")
 
     def refreshWindow(self):
-        curses.wrefresh(self.win)
+        unicurses.wrefresh(self.win)

@@ -1,6 +1,6 @@
 from window.window import Window
 from window.gameWindow import GameWindow
-import unicurses as curses
+import unicurses
 from time import sleep
 from snake import Snake
 from snack import Snack
@@ -75,10 +75,10 @@ class Controller:
                 self.running = False
                 break
             if key in [
-                curses.KEY_UP, \
-                curses.KEY_RIGHT, \
-                curses.KEY_DOWN, \
-                curses.KEY_LEFT,
+                unicurses.KEY_UP, \
+                unicurses.KEY_RIGHT, \
+                unicurses.KEY_DOWN, \
+                unicurses.KEY_LEFT,
             ]:
                 self.lastDirectionKey = key
 
@@ -89,13 +89,13 @@ class Controller:
 
     def moveSnake(self):
         # executes in a thread → moves the snake, displays, updates the score
-        if self.lastDirectionKey == curses.KEY_UP:
+        if self.lastDirectionKey == unicurses.KEY_UP:
             self.snake.setDirection("up")
-        elif self.lastDirectionKey == curses.KEY_RIGHT:
+        elif self.lastDirectionKey == unicurses.KEY_RIGHT:
             self.snake.setDirection("right")
-        elif self.lastDirectionKey == curses.KEY_DOWN:
+        elif self.lastDirectionKey == unicurses.KEY_DOWN:
             self.snake.setDirection("down")
-        elif self.lastDirectionKey == curses.KEY_LEFT:
+        elif self.lastDirectionKey == unicurses.KEY_LEFT:
             self.snake.setDirection("left")
 
         # Check if next position has collision

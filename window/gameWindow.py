@@ -1,5 +1,5 @@
 from window.window import Window
-import unicurses as curses
+import unicurses
 from time import sleep
 
 class GameWindow(Window):
@@ -9,21 +9,21 @@ class GameWindow(Window):
     Manages keyboard input'''
     def __init__(self, width, height, x, y,hasBorder):
         super().__init__(width, height, x, y, hasBorder)
-        curses.nodelay(self.win, True)
-        curses.keypad(self.win, True)
-        curses.notimeout(self.win, True)
+        unicurses.nodelay(self.win, True)
+        unicurses.keypad(self.win, True)
+        unicurses.notimeout(self.win, True)
 
     def draw_snake(self, coordinates, char):
+        unicurses.wattron(self.win, unicurses.color_pair(1))
         for x, y in coordinates:
-            curses.wattron(self.win, curses.color_pair(1))
             self.drawChar(x, y, char)
-            curses.wattroff(self.win, curses.color_pair(1))
+        unicurses.wattroff(self.win, unicurses.color_pair(1))
         self.refreshWindow()
 
     def draw_snack(self, x, y, char):
-        curses.wattron(self.win, curses.color_pair(2))
+        unicurses.wattron(self.win, unicurses.color_pair(2))
         self.drawChar(x, y, char)
-        curses.wattroff(self.win, curses.color_pair(2))
+        unicurses.wattroff(self.win, unicurses.color_pair(2))
         self.refreshWindow()
 
     def countdown(self):
@@ -36,13 +36,13 @@ class GameWindow(Window):
         self.refreshWindow()
 
     def get_key(self):
-        return curses.wgetch(self.win)
+        return unicurses.wgetch(self.win)
 
     def clear_snack_area(self, x, y):
         self.eraseChar(x, y)
         self.refreshWindow()
-        curses.mvwaddstr(self.win, y, x, " ")
+        unicurses.mvwaddstr(self.win, y, x, " ")
 
     def write_points(self, points):
-        curses.mvwaddstr(self.win, 0, 2, f"Points: {points}")
-        curses.wrefresh(self.win)
+        unicurses.mvwaddstr(self.win, 0, 2, f"Points: {points}")
+        unicurses.wrefresh(self.win)
