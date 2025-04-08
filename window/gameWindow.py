@@ -21,9 +21,16 @@ class GameWindow(Window):
         self.refreshWindow()
 
     def draw_snack(self, x, y, char):
-        curses.wattron(self.win, curses.color_pair(2))
+        if char == '|':
+            curses.wattron(self.win, curses.color_pair(3))
+        else:
+            curses.wattron(self.win, curses.color_pair(2))
+
         self.drawChar(x, y, char)
+
         curses.wattroff(self.win, curses.color_pair(2))
+        curses.wattroff(self.win, curses.color_pair(3))
+
         self.refreshWindow()
 
     def countdown(self):

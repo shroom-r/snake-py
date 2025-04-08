@@ -19,9 +19,9 @@ class Snack:
     def generate_position(self, snake_body):
         self.isMagic = True if random.random() < 0.05 else False
         if self.isMagic:
-            self.char = "Q"
+            self.char = '|'
         else:
-            self.char ="o"
+            self.char = 'O'
         available_positions = list(set(self.all_positions) - set(snake_body))
         # We use set() to subtract the two lists, which is very fast 
         self.position = random.choice(available_positions)

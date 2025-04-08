@@ -10,6 +10,7 @@ def main():
     unicurses.start_color()
     unicurses.init_pair(1, unicurses.COLOR_GREEN, unicurses.COLOR_BLACK)
     unicurses.init_pair(2, unicurses.COLOR_RED, unicurses.COLOR_BLACK)  
+    unicurses.init_pair(3, unicurses.COLOR_YELLOW, unicurses.COLOR_BLACK)
     unicurses.clear()
     unicurses.cbreak()
     unicurses.noecho()
