@@ -37,8 +37,8 @@ class Controller:
         instrWin.drawChar(1, 2, "q : quit")
         instrWin.drawChar(1, 3, "arrows : move snake")
         instrWin.drawChar(1, 5, "Snacks:")
-        instrWin.drawChar(1, 6, "o = normal (1pt)")
-        instrWin.drawChar(1, 7, "Q = magic (3pt)")
+        instrWin.drawChar(1, 6, "O = normal (1pt)")
+        instrWin.drawChar(1, 7, "( = magic (3pt)")
         instrWin.refreshWindow()
 
         # Set informations window

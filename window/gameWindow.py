@@ -21,7 +21,7 @@ class GameWindow(Window):
         self.refreshWindow()
 
     def draw_snack(self, x, y, char):
-        if char == '|':
+        if char == '(':
             unicurses.wattron(self.win, unicurses.color_pair(3))
         else:
             unicurses.wattron(self.win, unicurses.color_pair(2))
